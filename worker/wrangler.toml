@@ -1,0 +1,23 @@
+name = "naser-paygir"
+main = "src/index.ts"
+compatibility_date = "2025-09-01"
+workers_dev = true
+
+[observability]
+enabled = true
+
+[vars]
+BOT_USERNAME = "naser_paygir_bot"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "naser-paygir-db"
+database_id = "105d92c4-0cd5-4566-9564-ddd9645672a2"
+
+[triggers]
+crons = ["* * * * *"]
+
+# Secrets (set once, never commit):
+#   npx wrangler secret put TELEGRAM_BOT_TOKEN
+#   npx wrangler secret put OPENROUTER_API_KEY
+# WEBHOOK_SECRET is optional: if unset it is derived from the bot token (see src/index.ts).

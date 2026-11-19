@@ -1,0 +1,23 @@
+{
+  "name": "naser-paygir-worker",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "build": "esbuild src/index.ts --bundle --format=esm --target=es2022 --charset=utf8 --outfile=dist/worker.js",
+    "typecheck": "tsc -p .",
+    "deploy": "wrangler deploy",
+    "db:schema": "wrangler d1 execute naser-paygir-db --remote --file=schema.sql",
+    "test": "npm run build && node test/t1.mjs"
+  },
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20261119.1",
+    "esbuild": "^0.28.2",
+    "miniflare": "^4.20260730.0",
+    "typescript": "^7.0.2",
+    "wrangler": "^4.165.0"
+  },
+  "private": true
+}

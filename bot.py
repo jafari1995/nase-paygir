@@ -62,6 +62,7 @@ DB.setdefault("banned", []); DB.setdefault("names", {})
 MAX_ACTIVE = 5; MAX_PER_DAY = 5; LLM_PER_HOUR = 20
 DB.setdefault("voice_prob", 0.28)
 import voice as V
+import gender as GN
 DB.setdefault("voice_style", "AB"); V.STYLE = DB["voice_style"]
 VOICE_RE = re.compile(r"(با\s*ویس|ویس\s*(بده|بفرست|بگو)|صوتی|وویس)")
 NOVOICE_RE = re.compile(r"(بدون\s*ویس|ویس\s*نده|ویس\s*نفرست|متنی)")
@@ -214,12 +215,13 @@ async def gen_followup(fu, voice=False):
     if voice:
         user += f"\nاین پیام قراره ویس (صوتی) بشه: حداکثر {V.MAX_WORDS} کلمه، ۱-۲ جمله‌ی کوتاه و گفتاری، بدون ایموجی و علامت عجیب، مثل اینکه داری با صدای لوتی پشت تلفن حرف می‌زنی."
         if V.STYLE != "orig": user += "\n" + V.SPOKEN_HINT
+    user += "\n" + GN.hint(GN.gender_of(fu), "خودش" if fu.get("self") else "طرف")
     sysm = SELF_SYSTEM if fu.get("self") else SYSTEM.replace("حامد", fu.get("creator_name") or "رفیقم")
     if fu.get("self"): user = user.replace("اسم طرف:", "اسم خودش:").replace("موضوع:", "کار/هدفش:") + ("\n(کار تکراری/عادت روزانه)" if fu.get("recurring") else "")
     txt, model = await llm([{"role": "system", "content": sysm}, {"role": "user", "content": user}])
     if not txt:
         txt = random.choice(FALLBACK).format(name=fu["name"], subject=subj(fu)); model = "template"
-    return scrub_ids(txt, fu), model
+    return GN.fix(scrub_ids(txt, fu), GN.gender_of(fu)), model
 
 async def gen_thanks(fu):
     txt, _ = await llm([{"role": "system", "content": "به فارسی محاوره‌ای و لوتی‌منش، یه پیام تشکر کوتاه (۱-۲ جمله) و بامزه بنویس چون طرف بدهی/خواسته‌اش رو انجام داده. فقط متن پیام."},
@@ -932,6 +934,7 @@ async def do_create(update, ctx, d, rep):
     if fu["status"] == "active":
         first = scrub_ids((d.get("first_line") or "").strip(), fu) if delivery == "group" else ""
         if first and fu["name"] not in first: first = f"{fu['name']} جان، {first}"
+        first = GN.fix(first, GN.gender_of(fu))
         as_voice = want_voice(fu)
         if not first or (as_voice and len(first.split()) > V.MAX_WORDS):
             first, _ = await gen_followup(fu, voice=as_voice)
@@ -963,6 +966,7 @@ async def handle_stop(update, ctx, fu, text):
                             {"role": "user", "content": f"اسم: {fu['name']}\nموضوع: {subj(fu)}"}], 200)
         txt = txt or f"باشه {fu['name']} جان، ناصر کوتاه اومد 🎩 ولی یادت باشه مرد به قولشه. خداحافظ!"
         fu["status"] = "stopped"
+    txt = GN.fix(txt, GN.gender_of(fu))
     m, _ = await send_voice_or_text(ctx.bot, msg.chat.id, txt, reply_to=msg.message_id, force_voice=want_voice(fu))
     fu["bot_msg_ids"] = (fu.get("bot_msg_ids", []) + [m.message_id])[-30:]
     save(DB)
@@ -990,7 +994,7 @@ async def handle_target(update: Update, ctx: ContextTypes.DEFAULT_TYPE, fu, text
         p = p.replace("اسم طرف:", "اسم خودش:").replace("موضوع:", "کار/هدفش:")
     d, model = await llm_json(tsys, p, 500)
     intent = (d or {}).get("intent", "other")
-    if d and d.get("reply"): d["reply"] = scrub_ids(d["reply"], fu)
+    if d and d.get("reply"): d["reply"] = GN.fix(scrub_ids(d["reply"], fu), GN.gender_of(fu))
     if intent == "stop": return await handle_stop(update, ctx, fu, text)
     reply = (d or {}).get("reply") or f"پیامت رو گرفتم داداش، به {cn} می‌رسونم 👍"
     convo += [f"طرف: {text}", f"ناصر: {reply}"]; del convo[:-12]

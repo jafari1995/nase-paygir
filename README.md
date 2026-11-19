@@ -61,3 +61,29 @@ Max 5 open follow-ups, 5 messages/day per follow-up, ≥1 h spacing, 20 free-for
 - `naser.py` — persona & intent-parsing prompts
 - `voice.py` — TTS styles (edge-tts / piper) + ffmpeg FX → OGG/Opus voice notes
 - `run.sh` / `start.sh` — restart loop & background launcher
+
+---
+
+## ☁️ Cloudflare Workers (worker/)
+
+**فارسی** — نسخه‌ی TypeScript ناصر در پوشه‌ی `worker/` است و روی Cloudflare Workers اجرا می‌شود (بدون نیاز به روشن بودن کامپیوتر):
+- وبهوک تلگرام: `POST https://naser-paygir.abbas30000.workers.dev/telegram` (هدر `X-Telegram-Bot-Api-Secret-Token` بررسی می‌شود)
+- کران هر دقیقه (`* * * * *`) برای ارسال پیگیری‌ها؛ همه‌ی داده‌ها در D1 (`naser-paygir-db`)
+- ویس: edge-tts (fa-IR-FaridNeural) از طریق WebSocket، سبک AB با prosody جمله‌به‌جمله، خروجی MP3 (تلگرام sendVoice قبول می‌کند)
+- فقط مدل‌های رایگان OpenRouter (`:free` + سقف قیمت صفر)
+- آگاهی از جنسیت: برای خانم‌ها «آبجی/خواهر/خانم»، برای نامعلوم «رفیق»؛ با «فلانی خانمه/پسره» قابل تغییر است
+
+راه‌اندازی دوباره از GitHub:
+```bash
+git clone https://github.com/jafari1995/nase-paygir.git && cd nase-paygir/worker
+npm install
+npx wrangler login
+npx wrangler d1 execute naser-paygir-db --remote --file=schema.sql   # فقط بار اول (دیتابیس جدید → database_id را در wrangler.toml عوض کنید)
+npx wrangler secret put TELEGRAM_BOT_TOKEN
+npx wrangler secret put OPENROUTER_API_KEY
+npx wrangler deploy
+# سپس وبهوک: python3 cutover.py set-webhook   (secret_token از توکن مشتق می‌شود)
+```
+برگشت به نسخه‌ی پایتون (rollback): `python3 worker/cutover.py rollback` (یعنی deleteWebhook و سپس `./start.sh`).
+
+**English** — `worker/` is the TypeScript port running on Cloudflare Workers: Telegram webhook with secret-token check, a 1-minute Cron Trigger, all state in D1 (`naser-paygir-db`; see `schema.sql`, `migrate_from_json.py` converts the old `data.json`). Voice uses edge-tts over an outbound WebSocket (MP3 24 kHz; the service rejects `ogg-24khz-16bit-mono-opus`). Free OpenRouter models only. Redeploy with the commands above (`wrangler.toml` holds the D1 binding, cron and `BOT_USERNAME`). Local tests: `python3 migrate_from_json.py ../data.json .migrate/test.sql naser_paygir_bot && npm test` (Telegram calls are mocked by Miniflare; OpenRouter is real).
