@@ -1,0 +1,24 @@
+# runtime data / secrets — never commit
+data.json
+data.json.tmp
+data.backup-*
+*.log
+.env
+.env.*
+!.env.example
+runner.pid
+# generated audio & models
+samples/
+voice_tmp/
+voices/
+piper/
+*.onnx
+*.onnx.json
+*.ogg
+*.mp3
+*.wav
+# python
+__pycache__/
+*.pyc
+# old local versions
+*.v[0-9].py
