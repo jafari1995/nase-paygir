@@ -12,7 +12,7 @@ BOT_USERNAME = "naser_paygir_bot"
 [[d1_databases]]
 binding = "DB"
 database_name = "naser-paygir-db"
-database_id = "105d92c4-0cd5-4566-9564-ddd9645672a2"
+database_id = "9c57f89a-472d-4d25-a738-26ca50247bfb"
 
 [triggers]
 crons = ["* * * * *"]

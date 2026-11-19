@@ -7,7 +7,7 @@
   python3 cutover.py rollback     # deleteWebhook + restart the Python bot (../start.sh)
 """
 import hashlib, json, os, subprocess, sys, urllib.request, urllib.parse
-URL = "https://naser-paygir.abbas30000.workers.dev"
+URL = "https://naser-paygir.bibigolnar.workers.dev"
 TOK = os.environ["TELEGRAM_BOT_TOKEN"].strip()
 SECRET = hashlib.sha256(("naser-webhook:" + TOK).encode()).hexdigest()[:48]
 def tg(method, **p):
@@ -15,7 +15,7 @@ def tg(method, **p):
     return json.load(urllib.request.urlopen(f"https://api.telegram.org/bot{TOK}/{method}", data=data, timeout=30))
 cmd = sys.argv[1] if len(sys.argv) > 1 else "check"
 if cmd == "check":
-    req = urllib.request.Request(URL + "/selftest/tts", headers={"X-Selftest-Token": SECRET})
+    req = urllib.request.Request(URL + "/selftest/tts", headers={"X-Selftest-Token": SECRET, "User-Agent": "naser-cutover/1.0"})
     try:
         r = urllib.request.urlopen(req, timeout=60); b = r.read()
         open("/tmp/naser_selftest.mp3", "wb").write(b)

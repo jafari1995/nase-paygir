@@ -67,7 +67,7 @@ Max 5 open follow-ups, 5 messages/day per follow-up, ≥1 h spacing, 20 free-for
 ## ☁️ Cloudflare Workers (worker/)
 
 **فارسی** — نسخه‌ی TypeScript ناصر در پوشه‌ی `worker/` است و روی Cloudflare Workers اجرا می‌شود (بدون نیاز به روشن بودن کامپیوتر):
-- وبهوک تلگرام: `POST https://naser-paygir.abbas30000.workers.dev/telegram` (هدر `X-Telegram-Bot-Api-Secret-Token` بررسی می‌شود)
+- وبهوک تلگرام: `POST https://naser-paygir.bibigolnar.workers.dev/telegram` (هدر `X-Telegram-Bot-Api-Secret-Token` بررسی می‌شود)
 - کران هر دقیقه (`* * * * *`) برای ارسال پیگیری‌ها؛ همه‌ی داده‌ها در D1 (`naser-paygir-db`)
 - ویس: edge-tts (fa-IR-FaridNeural) از طریق WebSocket، سبک AB با prosody جمله‌به‌جمله، خروجی MP3 (تلگرام sendVoice قبول می‌کند)
 - فقط مدل‌های رایگان OpenRouter (`:free` + سقف قیمت صفر)
